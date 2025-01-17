@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "start": "next start",
     "postinstall": "fumadocs-mdx"
   },
@@ -17,6 +17,7 @@
     "octokit": "^4.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "shiki": "^1.27.2",
     "zod": "3.24.1"
   },
   "devDependencies": {

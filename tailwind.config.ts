@@ -1,7 +1,7 @@
 // @ts-check
 import { createPreset } from "fumadocs-ui/tailwind-plugin";
+import type { Config } from "tailwindcss"
 
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./components/**/*.{ts,tsx}",
@@ -15,4 +15,4 @@ export default {
       preset: "black",
     }),
   ],
-};
+} satisfies Config;
