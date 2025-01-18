@@ -110,6 +110,7 @@ export async function createGitHubSource(): Promise<
 }
 
 function getTitleFromFile(file: string) {
+  const acronyms = ['css']
   const parsed = path.parse(file);
   const name =
     parsed.name === "index" ? path.basename(parsed.dir) : parsed.name;
@@ -117,19 +118,15 @@ function getTitleFromFile(file: string) {
   const match = FileNameRegex.exec(name);
   const title = match ? match[1] : name;
 
-  let upper = true;
-  let out = "";
-  for (const c of title) {
-    if (c === "-") {
-      upper = true;
-      out += " ";
-    } else if (upper) {
-      out += c.toUpperCase();
-      upper = false;
+  const segs = title.split('-')
+  for (let i = 0; i < segs.length; i++) {
+    if (acronyms.includes(segs[i])) {
+      segs[i] = segs[i].toUpperCase()
     } else {
-      out += c;
+      segs[i] = segs[i].slice(0, 1).toUpperCase() + segs[i].slice(1)
     }
   }
 
+  const out = segs.join(' ')
   return out.length > 0 ? out : "Overview";
 }
