@@ -1,28 +1,18 @@
 import type { Source, VirtualFile } from "fumadocs-core/source";
 import { loader } from "fumadocs-core/source";
-import { Octokit } from "octokit";
 import path from "node:path";
 import { compileMDX } from "@fumadocs/mdx-remote";
 import type { ReactNode } from "react";
 import type { TableOfContents } from "fumadocs-core/server";
 import { createMdxComponents } from "@/components/mdx";
 import { meta } from "./meta";
+import { remarkCompact } from "./remark-compact";
+import { fetchBlob, getDocsSha, octokit, sharedConfig } from "./github";
 
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
 
 const FileNameRegex = /^\d\d-(.+)$/;
-
-const octokit = new Octokit({
-  auth: token,
-  request: {
-    fetch: (request: any) => {
-      return fetch(request, {
-        cache: "force-cache",
-      });
-    },
-  },
-});
 
 export const source = loader({
   baseUrl: "/docs",
@@ -44,23 +34,6 @@ export const source = loader({
     return segments;
   },
 });
-
-async function getDocsSha() {
-  const out = await octokit.request(
-    "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-    {
-      owner: "vercel",
-      repo: "next.js",
-      tree_sha: "canary",
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    },
-  );
-
-  const docs = out.data.tree.find((item) => item.path === "docs");
-  return docs?.sha;
-}
 
 export async function createGitHubSource(): Promise<
   Source<{
@@ -84,8 +57,7 @@ export async function createGitHubSource(): Promise<
   const out = await octokit.request(
     "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
     {
-      owner: "vercel",
-      repo: "next.js",
+      ...sharedConfig,
       tree_sha: sha,
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
@@ -97,9 +69,11 @@ export async function createGitHubSource(): Promise<
   const pages = out.data.tree.flatMap((file) => {
     if (!file.path || !file.url || file.type === "tree") return [];
 
-    if (path.extname(file.path) === '.json') {
-      console.warn('We do not handle .json files at the moment, you need to hardcode them')
-      return []
+    if (path.extname(file.path) === ".json") {
+      console.warn(
+        "We do not handle .json files at the moment, you need to hardcode them",
+      );
+      return [];
     }
 
     return {
@@ -109,38 +83,26 @@ export async function createGitHubSource(): Promise<
         title: getTitleFromFile(file.path),
 
         async load() {
-          const res = await fetch(file.url as string, {
-            cache: "force-cache",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!res.ok) {
-            throw new Error(await res.text());
-          }
-
-          const { content: base64 } = (await res.json()) as {
-            content: string;
-          };
-
-          const content = Buffer.from(base64, "base64").toString();
+          const content = await fetchBlob(file.url as string);
 
           const compiled = await compileMDX({
             filePath: file.path,
             source: content,
             components: createMdxComponents(file.path!.startsWith("app")),
+            mdxOptions: {
+              remarkPlugins: (v) => [remarkCompact, ...v],
+            },
           });
 
           return {
             body: compiled.content,
             toc: compiled.toc,
-            ...compiled.frontmatter
+            ...compiled.frontmatter,
           };
         },
       },
     } satisfies VirtualFile;
-  })
+  });
 
   return {
     files: [...pages, ...meta],
@@ -169,5 +131,5 @@ function getTitleFromFile(file: string) {
     }
   }
 
-  return out;
+  return out.length > 0 ? out : "Overview";
 }
