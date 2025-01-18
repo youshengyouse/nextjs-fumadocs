@@ -26,7 +26,7 @@ const mdxComponents = {
     height: `${number}` | number;
     alt: string;
   }) => (
-    <div className="not-prose my-6 rounded-xl p-2 -m-2 bg-gradient-to-b from-fd-foreground/10 border shadow-lg">
+    <div className="not-prose my-6 rounded-xl p-2 -m-2 bg-gradient-to-b from-fd-foreground/5 border shadow-lg">
       <ImageZoom
         src={isRemoteImage ? `https://nextjs.org${srcLight}` : srcLight}
         loading="lazy"
