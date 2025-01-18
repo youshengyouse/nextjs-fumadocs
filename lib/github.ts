@@ -7,7 +7,6 @@ export const octokit = new Octokit({
   auth: token,
   request: {
     fetch: (request: any, opts?: any) => {
-      console.log(request);
       return fetch(request, {
         ...opts,
         cache: "force-cache",

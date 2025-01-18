@@ -8,6 +8,7 @@ import { createMdxComponents } from "@/components/mdx";
 import { meta } from "./meta";
 import { remarkCompact } from "./remark-compact";
 import { fetchBlob, getDocsSha, octokit, sharedConfig } from "./github";
+import { bundledLanguages } from "shiki/bundle-web.mjs"
 
 interface CompiledPage {
   full?: boolean;
@@ -110,12 +111,22 @@ async function compile(filePath: string, source: string) {
     components: createMdxComponents(filePath!.startsWith("app")),
     mdxOptions: {
       remarkPlugins: (v) => [remarkCompact, ...v],
+      rehypeCodeOptions: {
+        langs: Object.keys(bundledLanguages) as any,
+        experimentalJSEngine: true,
+        themes: {
+          light: 'github-light',
+          dark: 'vesper'
+        }
+      }
     },
   }).then((compiled) => ({
     body: compiled.content,
     toc: compiled.toc,
     ...compiled.frontmatter,
-  }));
+  })).finally(() => {
+    console.info('compiled', filePath)
+  });
 
   cache.set(key, compiling);
 
