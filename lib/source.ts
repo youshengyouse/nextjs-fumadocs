@@ -2,12 +2,21 @@ import type { Source, VirtualFile } from "fumadocs-core/source";
 import { loader } from "fumadocs-core/source";
 import path from "node:path";
 import { compileMDX } from "@fumadocs/mdx-remote";
-import { cache, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import type { TableOfContents } from "fumadocs-core/server";
 import { createMdxComponents } from "@/components/mdx";
 import { meta } from "./meta";
 import { remarkCompact } from "./remark-compact";
 import { fetchBlob, getDocsSha, octokit, sharedConfig } from "./github";
+
+interface CompiledPage {
+  full?: boolean;
+  source?: string;
+  description?: string;
+
+  toc: TableOfContents;
+  body: ReactNode;
+}
 
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
@@ -40,14 +49,7 @@ export async function createGitHubSource(): Promise<
     metaData: { title: string; pages: string[] }; // Your custom type
     pageData: {
       title: string;
-      load: () => Promise<{
-        full?: boolean;
-        source?: string;
-        description?: string;
-
-        toc: TableOfContents;
-        body: ReactNode;
-      }>;
+      load: () => Promise<CompiledPage>;
     }; // Your custom type
   }>
 > {
@@ -96,22 +98,29 @@ export async function createGitHubSource(): Promise<
   };
 }
 
-const compile = cache(async (filePath: string, source: string) => {
-  const compiled = await compileMDX({
+const cache = new Map<string, Promise<CompiledPage>>();
+async function compile(filePath: string, source: string) {
+  const key = `${filePath}:${source}`;
+  const cached = cache.get(key);
+
+  if (cached) return cached;
+  const compiling = compileMDX({
     filePath,
     source,
     components: createMdxComponents(filePath!.startsWith("app")),
     mdxOptions: {
       remarkPlugins: (v) => [remarkCompact, ...v],
     },
-  });
-
-  return {
+  }).then((compiled) => ({
     body: compiled.content,
     toc: compiled.toc,
     ...compiled.frontmatter,
-  };
-});
+  }));
+
+  cache.set(key, compiling);
+
+  return compiling;
+}
 
 function getTitleFromFile(file: string) {
   const acronyms = ["css", "ui"];

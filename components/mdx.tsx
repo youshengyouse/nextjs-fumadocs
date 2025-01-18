@@ -5,7 +5,7 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Check, X } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 
-const isDev = process.env.NODE_ENV === "development";
+const isRemoteImage = true;
 
 const mdxComponents = {
   ...defaultMdxComponents,
@@ -28,13 +28,13 @@ const mdxComponents = {
   }) => (
     <div className="not-prose my-6 rounded-xl p-2 -m-2 bg-gradient-to-b from-fd-foreground/10 border shadow-lg">
       <ImageZoom
-        src={isDev ? `https://nextjs.org${srcLight}` : srcLight}
+        src={isRemoteImage ? `https://nextjs.org${srcLight}` : srcLight}
         loading="lazy"
         {...props}
         className="rounded-lg block dark:hidden"
       />
       <ImageZoom
-        src={isDev ? `https://nextjs.org${srcDark}` : srcDark}
+        src={isRemoteImage ? `https://nextjs.org${srcDark}` : srcDark}
         loading="lazy"
         {...props}
         className="rounded-lg hidden dark:block"
