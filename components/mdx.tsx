@@ -1,8 +1,8 @@
 import { Callout } from "fumadocs-ui/components/callout";
+import { ImageZoom } from "fumadocs-ui/components/image-zoom";
 import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Check, X } from "lucide-react";
-import Image from "next/image";
 import { Fragment, type ReactNode } from "react";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -14,27 +14,32 @@ const mdxComponents = {
   Tab,
   Check,
   Cross: X,
-  Image: (props: {
+  Image: ({
+    srcDark,
+    srcLight,
+    ...props
+  }: {
     srcDark: string;
     srcLight: string;
 
-    width: string | number;
-    height: string | number;
+    width: `${number}` | number;
+    height: `${number}` | number;
     alt: string;
   }) => (
-    <picture>
-      <source
-        srcSet={isDev ? `https://nextjs.org${props.srcDark}` : props.srcDark}
-        media="(prefers-color-scheme: dark)"
+    <div className="not-prose my-6 rounded-xl p-2 -m-2 bg-gradient-to-b from-fd-foreground/10 border shadow-lg">
+      <ImageZoom
+        src={isDev ? `https://nextjs.org${srcLight}` : srcLight}
+        loading="lazy"
+        {...props}
+        className="rounded-lg block dark:hidden"
       />
-      <Image
-        src={isDev ? `https://nextjs.org${props.srcLight}` : props.srcLight}
-        alt="My image"
-        width={props.width as any}
-        height={props.height as any}
-        className="rounded-lg"
+      <ImageZoom
+        src={isDev ? `https://nextjs.org${srcDark}` : srcDark}
+        loading="lazy"
+        {...props}
+        className="rounded-lg hidden dark:block"
       />
-    </picture>
+    </div>
   ),
 };
 

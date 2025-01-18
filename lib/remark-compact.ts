@@ -2,16 +2,16 @@ import { visit } from "unist-util-visit";
 import type { Transformer } from "unified";
 import type { Code, Root, RootContent } from "mdast";
 
-const FileNameRegex = /filename="(.+)"/;
+const FileNameRegex = /file[nN]ame="(.+?)"/;
 
 /**'
  * A remark plugin to convert Next.js docs Markdown syntax to Fumadocs format
  */
 export function remarkCompact(): Transformer<Root, Root> {
   function toTab(nodes: Code[]) {
-    const names = nodes.map((node) => {
+    const names = nodes.map((node, i) => {
       const match = FileNameRegex.exec(node.meta ?? "");
-      return match?.[1] ?? "Tab";
+      return match?.[1] ?? `Tab ${i}`;
     });
 
     const itemsArr = {
@@ -56,7 +56,14 @@ export function remarkCompact(): Transformer<Root, Root> {
               value: names[i],
             },
           ],
-          children: [node],
+          children: [
+            {
+              ...node,
+              meta: node.meta
+                ?.replaceAll("switcher", "")
+                ?.replace(FileNameRegex, ""),
+            },
+          ],
         };
       }),
     };
@@ -66,26 +73,36 @@ export function remarkCompact(): Transformer<Root, Root> {
     visit(tree, (node) => {
       if (!("children" in node)) return;
       let start = -1;
+      let i = 0;
 
-      for (let i = 0; i < node.children.length; i++) {
+      while (i < node.children.length) {
         const child = node.children[i];
-
-        if (
+        const isSwitcher =
           child.type === "code" &&
           child.meta &&
-          child.meta.includes("switcher")
-        ) {
-          if (start === -1) start = i;
-        } else if (start !== -1) {
-          const targets = node.children.slice(start, i);
+          child.meta.includes("switcher");
+
+        if (isSwitcher && start === -1) {
+          start = i;
+        }
+
+        // if switcher code blocks terminated, convert them to tabs
+        const isLast = i === node.children.length - 1;
+        if (start !== -1 && (isLast || !isSwitcher)) {
+          const end = isSwitcher ? i + 1 : i;
+          const targets = node.children.slice(start, end);
 
           node.children.splice(
             start,
-            i - start,
+            end - start,
             toTab(targets as Code[]) as RootContent,
           );
+
+          if (isLast) break;
+          i = start + 1;
           start = -1;
-          i = start;
+        } else {
+          i++;
         }
       }
     });

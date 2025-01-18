@@ -2,7 +2,7 @@ import type { Source, VirtualFile } from "fumadocs-core/source";
 import { loader } from "fumadocs-core/source";
 import path from "node:path";
 import { compileMDX } from "@fumadocs/mdx-remote";
-import type { ReactNode } from "react";
+import { cache, type ReactNode } from "react";
 import type { TableOfContents } from "fumadocs-core/server";
 import { createMdxComponents } from "@/components/mdx";
 import { meta } from "./meta";
@@ -85,20 +85,7 @@ export async function createGitHubSource(): Promise<
         async load() {
           const content = await fetchBlob(file.url as string);
 
-          const compiled = await compileMDX({
-            filePath: file.path,
-            source: content,
-            components: createMdxComponents(file.path!.startsWith("app")),
-            mdxOptions: {
-              remarkPlugins: (v) => [remarkCompact, ...v],
-            },
-          });
-
-          return {
-            body: compiled.content,
-            toc: compiled.toc,
-            ...compiled.frontmatter,
-          };
+          return compile(file.path!, content);
         },
       },
     } satisfies VirtualFile;
@@ -109,8 +96,25 @@ export async function createGitHubSource(): Promise<
   };
 }
 
+const compile = cache(async (filePath: string, source: string) => {
+  const compiled = await compileMDX({
+    filePath,
+    source,
+    components: createMdxComponents(filePath!.startsWith("app")),
+    mdxOptions: {
+      remarkPlugins: (v) => [remarkCompact, ...v],
+    },
+  });
+
+  return {
+    body: compiled.content,
+    toc: compiled.toc,
+    ...compiled.frontmatter,
+  };
+});
+
 function getTitleFromFile(file: string) {
-  const acronyms = ['css']
+  const acronyms = ["css", "ui"];
   const parsed = path.parse(file);
   const name =
     parsed.name === "index" ? path.basename(parsed.dir) : parsed.name;
@@ -118,15 +122,15 @@ function getTitleFromFile(file: string) {
   const match = FileNameRegex.exec(name);
   const title = match ? match[1] : name;
 
-  const segs = title.split('-')
+  const segs = title.split("-");
   for (let i = 0; i < segs.length; i++) {
     if (acronyms.includes(segs[i])) {
-      segs[i] = segs[i].toUpperCase()
+      segs[i] = segs[i].toUpperCase();
     } else {
-      segs[i] = segs[i].slice(0, 1).toUpperCase() + segs[i].slice(1)
+      segs[i] = segs[i].slice(0, 1).toUpperCase() + segs[i].slice(1);
     }
   }
 
-  const out = segs.join(' ')
+  const out = segs.join(" ");
   return out.length > 0 ? out : "Overview";
 }
