@@ -85,6 +85,7 @@ export function remarkCompact(): Transformer<Root, Root> {
             toTab(targets as Code[]) as RootContent,
           );
           start = -1;
+          i = start;
         }
       }
     });

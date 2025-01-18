@@ -22,7 +22,7 @@ export default async function Page(props: {
 
     if (!sourcePage)
       throw new Error(
-        `unresolved source in frontmatter of ${page.file.path}: ${content.source}`,
+        `unresolved source in frontmatter of ${page.file.path}: ${content.source}`
       );
     content = await sourcePage.data.load();
   }
@@ -39,10 +39,6 @@ export default async function Page(props: {
       </DocsBody>
     </DocsPage>
   );
-}
-
-export async function generateStaticParams() {
-  return source.generateParams();
 }
 
 export async function generateMetadata(props: {
