@@ -1,22 +1,23 @@
 import type { Source, VirtualFile } from "fumadocs-core/source";
 import { loader } from "fumadocs-core/source";
-import path from "node:path";
+import * as path from "node:path";
 import { compileMDX } from "@fumadocs/mdx-remote";
-import { type ReactNode } from "react";
+import type { FC } from "react";
 import type { TableOfContents } from "fumadocs-core/server";
-import { createMdxComponents } from "@/components/mdx";
 import { meta } from "./meta";
 import { remarkCompact } from "./remark-compact";
 import { fetchBlob, getDocsSha, octokit, sharedConfig } from "./github";
-import { bundledLanguages } from "shiki/bundle-web.mjs";
+import type { MDXComponents } from "mdx/types";
 
 interface CompiledPage {
   full?: boolean;
   source?: string;
+
+  title?: string;
   description?: string;
 
   toc: TableOfContents;
-  body: ReactNode;
+  body: FC<{ components?: MDXComponents }>;
 }
 
 const token = process.env.GITHUB_TOKEN;
@@ -105,10 +106,10 @@ async function compile(filePath: string, source: string) {
   const cached = cache.get(key);
 
   if (cached) return cached;
+  console.time("compile md");
   const compiling = compileMDX({
     filePath,
     source,
-    components: createMdxComponents(filePath!.startsWith("app")),
     mdxOptions: {
       remarkPlugins: (v) => [remarkCompact, ...v],
       rehypeCodeOptions: {
@@ -124,22 +125,24 @@ async function compile(filePath: string, source: string) {
           "json",
           "yaml",
           "json5",
+          "css",
+          "sass",
         ],
         experimentalJSEngine: true,
         themes: {
           light: "github-light",
-          dark: "vesper",
+          dark: "github-dark",
         },
       },
     },
   })
     .then((compiled) => ({
-      body: compiled.content,
+      body: compiled.body,
       toc: compiled.toc,
       ...compiled.frontmatter,
     }))
     .finally(() => {
-      console.info("compiled", filePath);
+      console.timeEnd("compile md");
     });
 
   cache.set(key, compiling);
@@ -149,6 +152,7 @@ async function compile(filePath: string, source: string) {
 
 function getTitleFromFile(file: string) {
   const acronyms = ["css", "ui"];
+  const connectives = ["and"];
   const parsed = path.parse(file);
   const name =
     parsed.name === "index" ? path.basename(parsed.dir) : parsed.name;
@@ -160,7 +164,7 @@ function getTitleFromFile(file: string) {
   for (let i = 0; i < segs.length; i++) {
     if (acronyms.includes(segs[i])) {
       segs[i] = segs[i].toUpperCase();
-    } else {
+    } else if (!connectives.includes(segs[i])) {
       segs[i] = segs[i].slice(0, 1).toUpperCase() + segs[i].slice(1);
     }
   }

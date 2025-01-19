@@ -24,7 +24,7 @@ export async function fetchBlob(url: string): Promise<string> {
     },
   });
 
-  console.log("fetched", url);
+  console.time(`fetch ${url}`);
   if (!res.ok) {
     throw new Error(await res.text());
   }
@@ -33,6 +33,7 @@ export async function fetchBlob(url: string): Promise<string> {
     content: string;
   };
 
+  console.timeEnd(`fetch ${url}`);
   return Buffer.from(base64, "base64").toString();
 }
 

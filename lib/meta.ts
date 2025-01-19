@@ -6,6 +6,18 @@ export const meta: VirtualFile[] = [
     data: {
       title: "App Router",
       root: true,
+      pages: [
+        "[Overview](/docs/app)",
+        "---Getting Started---",
+        "...01-getting-started",
+        "---Examples---",
+        "[Overview](/docs/app/examples)",
+        "...02-examples",
+        "---Building Your Application---",
+        "...03-building-your-application",
+        "---API Reference---",
+        "...04-api-reference",
+      ],
     },
     path: "01-app/meta.json",
   },

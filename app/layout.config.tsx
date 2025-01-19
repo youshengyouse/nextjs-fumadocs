@@ -10,10 +10,10 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
-      <span className="inline-flex flex-row gap-4 items-center pb-2">
+      <span className="inline-flex flex-row gap-3 items-center pb-2">
         <svg
           aria-label="Vercel logomark"
-          height="64"
+          height="22"
           role="img"
           viewBox="0 0 74 64"
           className="size-6 overflow-visible"
@@ -26,7 +26,7 @@ export const baseOptions: BaseLayoutProps = {
         <span className="block w-px h-6 rotate-[16deg] bg-fd-border" />
         <svg
           style={{
-            width: 80,
+            width: 90,
           }}
           aria-label="Next.js logotype"
           role="img"
@@ -75,6 +75,14 @@ export const baseOptions: BaseLayoutProps = {
       text: "Documentation",
       url: "/docs",
       active: "nested-url",
+    },
+    {
+      text: "Showcase",
+      url: "https://nextjs.org/showcase",
+    },
+    {
+      text: "Blog",
+      url: "https://nextjs.org/blog",
     },
   ],
 };

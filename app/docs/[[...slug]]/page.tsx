@@ -1,3 +1,4 @@
+import { createMdxComponents } from "@/components/mdx";
 import { source } from "@/lib/source";
 import {
   DocsPage,
@@ -7,6 +8,8 @@ import {
   DocsCategory,
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
+
+export const revalidate = 60 * 60 * 2;
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -27,12 +30,16 @@ export default async function Page(props: {
     content = await sourcePage.data.load();
   }
 
+  const MdxContent = content.body;
+
   return (
     <DocsPage toc={content.toc} full={content.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsTitle>{content.title}</DocsTitle>
       <DocsDescription>{content.description}</DocsDescription>
       <DocsBody>
-        {content.body}
+        <MdxContent
+          components={createMdxComponents(params.slug?.[0] === "app")}
+        />
         {page.file.name === "index" && (
           <DocsCategory page={page} from={source} />
         )}
