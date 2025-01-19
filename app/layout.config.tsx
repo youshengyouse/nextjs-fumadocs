@@ -10,7 +10,7 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
-      <span className="inline-flex flex-row gap-3 items-center pb-2">
+      <span className="inline-flex flex-row gap-3 items-center pb-2 [aside_&]:-ms-1.5">
         <svg
           aria-label="Vercel logomark"
           height="22"
