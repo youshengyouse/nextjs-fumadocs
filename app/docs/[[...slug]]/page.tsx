@@ -9,7 +9,7 @@ import {
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 
-export const revalidate = 60 * 60 * 2;
+export const revalidate = 7200;
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -25,7 +25,7 @@ export default async function Page(props: {
 
     if (!sourcePage)
       throw new Error(
-        `unresolved source in frontmatter of ${page.file.path}: ${content.source}`,
+        `unresolved source in frontmatter of ${page.file.path}: ${content.source}`
       );
     content = await sourcePage.data.load();
   }
