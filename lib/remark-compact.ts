@@ -69,10 +69,13 @@ function toTab(nodes: Code[]) {
  * A remark plugin to convert Next.js docs Markdown syntax to Fumadocs format
  */
 export function remarkCompact(): Transformer<Root, Root> {
-  function updateCodeMeta(code: Code) {
-    if (!code.meta) return;
+  function updateCode(code: Code) {
+    if (code.lang === '.env') code.lang = 'text'
+    if (code.lang === 'mjs') code.lang = 'js'
 
-    code.meta = code.meta.replace(FileNameRegex, (_, v) => `title="${v}"`);
+    if (code.meta) {
+      code.meta = code.meta.replace(FileNameRegex, (_, v) => `title="${v}"`);
+    }
   }
 
   // convert codeblock's switcher meta
@@ -112,7 +115,7 @@ export function remarkCompact(): Transformer<Root, Root> {
 
   return (tree) => {
     visit(tree, (node) => {
-      if (node.type === "code") updateCodeMeta(node);
+      if (node.type === "code") updateCode(node);
 
       if ("children" in node) convertSwitcher(node);
     });

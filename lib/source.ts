@@ -1,15 +1,15 @@
 import { loader } from "fumadocs-core/source";
 import * as path from "node:path";
 import { createGitHubSource } from "./sources/github";
-
-const token = process.env.GITHUB_TOKEN;
-if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
+import { createLocalSource } from "./sources/local";
 
 const FileNameRegex = /^\d\d-(.+)$/;
 
+export const isBuild = process.env.NEXT_PHASE === 'phase-production-build'
+
 export const source = loader({
   baseUrl: "/docs",
-  source: await createGitHubSource(),
+  source: isBuild ? await createLocalSource() : await createGitHubSource(),
   slugs(info) {
     const segments = info.flattenedPath
       .split("/")
