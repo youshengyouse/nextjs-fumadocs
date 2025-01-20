@@ -1,7 +1,7 @@
 import type { Source, VirtualFile } from "fumadocs-core/source";
 import { loader } from "fumadocs-core/source";
 import * as path from "node:path";
-import { compileMDX } from "@fumadocs/mdx-remote";
+import { createCompiler } from "@fumadocs/mdx-remote";
 import type { FC } from "react";
 import type { TableOfContents } from "fumadocs-core/server";
 import { meta } from "./meta";
@@ -100,6 +100,20 @@ export async function createGitHubSource(): Promise<
   };
 }
 
+const compiler = createCompiler({
+  remarkPlugins: (v) => [remarkCompact, ...v],
+  remarkImageOptions: false,
+  rehypeCodeOptions: {
+    lazy: true,
+    tab: false,
+    experimentalJSEngine: true,
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark'
+    }
+  }
+})
+
 const cache = new Map<string, Promise<CompiledPage>>();
 async function compile(filePath: string, source: string) {
   const key = `${filePath}:${source}`;
@@ -107,34 +121,9 @@ async function compile(filePath: string, source: string) {
 
   if (cached) return cached;
   console.time("compile md");
-  const compiling = compileMDX({
+  const compiling = compiler.compile({
     filePath,
     source,
-    mdxOptions: {
-      remarkPlugins: (v) => [remarkCompact, ...v],
-      rehypeCodeOptions: {
-        langs: [
-          "bash",
-          "tsx",
-          "ts",
-          "js",
-          "jsx",
-          "md",
-          "bash",
-          "mdx",
-          "json",
-          "yaml",
-          "json5",
-          "css",
-          "sass",
-        ],
-        experimentalJSEngine: true,
-        themes: {
-          light: "github-light",
-          dark: "github-dark",
-        },
-      },
-    },
   })
     .then((compiled) => ({
       body: compiled.body,
@@ -151,7 +140,7 @@ async function compile(filePath: string, source: string) {
 }
 
 function getTitleFromFile(file: string) {
-  const acronyms = ["css", "ui"];
+  const acronyms = ["css", "ui", "cli"];
   const connectives = ["and"];
   const parsed = path.parse(file);
   const name =

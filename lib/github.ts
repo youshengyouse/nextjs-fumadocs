@@ -16,6 +16,7 @@ export const octokit = new Octokit({
 });
 
 export async function fetchBlob(url: string): Promise<string> {
+  console.time(`fetch ${url}`);
   const res = await fetch(url, {
     cache: "force-cache",
     headers: {
@@ -24,7 +25,6 @@ export async function fetchBlob(url: string): Promise<string> {
     },
   });
 
-  console.time(`fetch ${url}`);
   if (!res.ok) {
     throw new Error(await res.text());
   }
