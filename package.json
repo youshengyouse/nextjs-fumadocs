@@ -5,6 +5,8 @@
   "scripts": {
     "build": "node ./scripts/clone-docs.mjs && next build",
     "dev": "next dev --turbo",
+    "dev:local": "LOCAL=true next dev --turbo",
+    "sync:docs": "node ./scripts/clone-docs.mjs",
     "start": "next start",
     "format": "prettier . -w"
   },

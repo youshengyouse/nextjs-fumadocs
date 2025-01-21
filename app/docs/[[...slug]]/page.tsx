@@ -1,5 +1,5 @@
 import { createMdxComponents } from "@/components/mdx";
-import { isBuild, source } from "@/lib/source";
+import { isLocal, source } from "@/lib/source";
 import {
   DocsPage,
   DocsBody,
@@ -49,7 +49,7 @@ export default async function Page(props: {
 }
 
 export function generateStaticParams(): { slug?: string[] }[] {
-  if (isBuild) return source.generateParams();
+  if (isLocal) return source.generateParams();
   return [];
 }
 
