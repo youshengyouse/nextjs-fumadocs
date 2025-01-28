@@ -70,8 +70,8 @@ function toTab(nodes: Code[]) {
  */
 export function remarkCompact(): Transformer<Root, Root> {
   function updateCode(code: Code) {
-    if (code.lang === '.env') code.lang = 'text'
-    if (code.lang === 'mjs') code.lang = 'js'
+    if (code.lang === ".env") code.lang = "text";
+    if (code.lang === "mjs") code.lang = "js";
 
     if (code.meta) {
       code.meta = code.meta.replace(FileNameRegex, (_, v) => `title="${v}"`);

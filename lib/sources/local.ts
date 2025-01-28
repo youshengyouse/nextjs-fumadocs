@@ -6,44 +6,44 @@ import { meta } from "../meta";
 import FastGlob from "fast-glob";
 import { readFile } from "node:fs/promises";
 
-const dir = 'next.js/docs'
+const dir = "next.js/docs";
 
 export async function createLocalSource(): Promise<
-    Source<{
-        metaData: { title: string; pages: string[] };
-        pageData: {
-            title: string;
-            load: () => Promise<CompiledPage>;
-        };
-    }>
+  Source<{
+    metaData: { title: string; pages: string[] };
+    pageData: {
+      title: string;
+      load: () => Promise<CompiledPage>;
+    };
+  }>
 > {
-    const files = await FastGlob(`${dir}/**/*.{mdx,json}`)
+  const files = await FastGlob(`${dir}/**/*.{mdx,json}`);
 
-    const pages = files.flatMap((file) => {
-        const relativePath = path.relative(dir, file)
-        if (path.extname(file) === ".json") {
-            console.warn(
-                "We do not handle .json files at the moment, you need to hardcode them",
-            );
-            return [];
-        }
-
-        return {
-            type: "page",
-            path: relativePath,
-            data: {
-                title: getTitleFromFile(relativePath),
-
-                async load() {
-                    const content = await readFile(file);
-
-                    return compile(file, content.toString());
-                },
-            },
-        } satisfies VirtualFile;
-    });
+  const pages = files.flatMap((file) => {
+    const relativePath = path.relative(dir, file);
+    if (path.extname(file) === ".json") {
+      console.warn(
+        "We do not handle .json files at the moment, you need to hardcode them",
+      );
+      return [];
+    }
 
     return {
-        files: [...pages, ...meta],
-    };
+      type: "page",
+      path: relativePath,
+      data: {
+        title: getTitleFromFile(relativePath),
+
+        async load() {
+          const content = await readFile(file);
+
+          return compile(file, content.toString());
+        },
+      },
+    } satisfies VirtualFile;
+  });
+
+  return {
+    files: [...pages, ...meta],
+  };
 }

@@ -5,7 +5,8 @@ import { createLocalSource } from "./sources/local";
 
 const FileNameRegex = /^\d\d-(.+)$/;
 
-export const isLocal = process.env.LOCAL || process.env.NEXT_PHASE === 'phase-production-build'
+export const isLocal =
+  process.env.LOCAL || process.env.NEXT_PHASE === "phase-production-build";
 
 export const source = loader({
   baseUrl: "/docs",

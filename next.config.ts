@@ -4,8 +4,8 @@ const config: NextConfig = {
   reactStrictMode: true,
   logging: {
     fetches: {
-      fullUrl: true
-    }
+      fullUrl: true,
+    },
   },
   images: {
     remotePatterns: [
