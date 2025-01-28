@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "node ./scripts/clone-docs.mjs && next build",
+    "build": "next build",
     "dev": "next dev --turbo",
     "dev:local": "LOCAL=true next dev --turbo",
-    "sync:docs": "node ./scripts/clone-docs.mjs",
+    "sync:docs": "git submodule update --init",
     "start": "next start",
     "format": "prettier . -w"
   },

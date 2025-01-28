@@ -26,6 +26,3 @@ yarn-error.log*
 .env*.local
 .vercel
 next-env.d.ts
-
-# cloned docs
-_docs_

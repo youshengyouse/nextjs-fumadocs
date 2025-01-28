@@ -6,6 +6,8 @@ import { meta } from "../meta";
 import FastGlob from "fast-glob";
 import { readFile } from "node:fs/promises";
 
+const dir = 'next.js/docs'
+
 export async function createLocalSource(): Promise<
     Source<{
         metaData: { title: string; pages: string[] };
@@ -15,10 +17,10 @@ export async function createLocalSource(): Promise<
         };
     }>
 > {
-    const files = await FastGlob('_docs_/docs/**/*.{mdx,json}')
+    const files = await FastGlob(`${dir}/**/*.{mdx,json}`)
 
     const pages = files.flatMap((file) => {
-        const relativePath = path.relative('_docs_/docs', file)
+        const relativePath = path.relative(dir, file)
         if (path.extname(file) === ".json") {
             console.warn(
                 "We do not handle .json files at the moment, you need to hardcode them",
