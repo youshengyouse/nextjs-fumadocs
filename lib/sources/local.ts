@@ -6,7 +6,9 @@ import { meta } from "../meta";
 import FastGlob from "fast-glob";
 import { readFile } from "node:fs/promises";
 
-const dir = "next.js/docs";
+// const dir = "next.js/docs";
+const dir = "/www2024/5_docs/official/next.js/docs";
+
 
 export async function createLocalSource(): Promise<
   Source<{

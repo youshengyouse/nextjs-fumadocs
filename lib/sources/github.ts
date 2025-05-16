@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { getTitleFromFile } from "../source";
 import { meta } from "../meta";
 
+// 这里在导入文件是就需要配置好GITHUB_TOKEN
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
 
@@ -75,6 +76,7 @@ export async function createGitHubSource(): Promise<
     }; // Your custom type
   }>
 > {
+
   const sha = await getDocsSha();
   if (!sha) throw new Error("Failed to find sha of docs directory");
 

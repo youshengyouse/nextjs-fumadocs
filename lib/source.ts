@@ -8,9 +8,14 @@ const FileNameRegex = /^\d\d-(.+)$/;
 export const isLocal =
   process.env.LOCAL || process.env.NEXT_PHASE === "phase-production-build";
 
+console.log("isLocal的值为", isLocal);
+let source2=isLocal ? "123" : "456"
+console.log("source的值",source2);
+
 export const source = loader({
   baseUrl: "/docs",
-  source: isLocal ? await createLocalSource() : await createGitHubSource(),
+  // source: isLocal ? await createLocalSource() : await createGitHubSource(),
+  source:  await createLocalSource(),
   slugs(info) {
     const segments = info.flattenedPath
       .split("/")
